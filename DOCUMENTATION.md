@@ -16,6 +16,8 @@ The problem domain was split into clear **bounded contexts** — `Users` and `Ga
 
 Domain entities (`User`, `Game`) carry behavior — they aren't just property bags. Rules like "update profile" or "change password" live on the entity itself, not scattered across the application layer.
 
+Each bounded context's flow was first mapped out with **Event Storming** — actors, commands, validation rules/policies, aggregates, and domain events — before it became code. The result is in [`diagrams/DiagramaEventStorming.jpg`](diagrams/DiagramaEventStorming.jpg), covering the user registration flow and the game creation flow (diagram labels are in Portuguese).
+
 ### 2.2 Clean Architecture and SOLID
 
 Within each module, code is organized in concentric layers — `Domain` → `Application` → `Infrastructure`, with `Endpoints` as the outermost layer. The rule is simple: dependencies always point inward. The domain doesn't know about the database, the application layer doesn't know about HTTP details, and infrastructure only implements contracts defined by the inner layers.
@@ -51,6 +53,8 @@ infra/terraform/                        # Azure infrastructure as code
 ```
 
 Each module implements a shared contract (`IModule`, with `RegisterModule` and `MapEndpoints`) and is registered with the host — modules never reference each other directly. Endpoints are built with **Minimal APIs**, grouped per module (`MapGroup("/api/...")`), with authentication required per group via `RequireAuthorization()`.
+
+The diagram in [`diagrams/DiagramaDDD.jpg`](diagrams/DiagramaDDD.jpg) shows this same structure visually: the two bounded contexts, their internal layers (Endpoints → Application → Domain, with Infrastructure implementing persistence), and the Shared Kernel/Infrastructure both contexts depend on (diagram labels are in Portuguese).
 
 ## 4. Domain model
 

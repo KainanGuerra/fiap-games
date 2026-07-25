@@ -4,6 +4,8 @@
 
 Cenários em estilo Gherkin descrevendo o comportamento observável da API. Eles descrevem *o quê* o sistema faz visto de fora (HTTP entra, HTTP sai) — é a camada de aceite que o `context.pt-BR.md` (a especificação) direciona, não detalhe de implementação.
 
+Os dois fluxos principais (registro de usuário e criação de jogo) foram primeiro mapeados com Event Storming antes de virar cenário — veja [`diagrams/DiagramaEventStorming.jpg`](diagrams/DiagramaEventStorming.jpg) para ver atores, comandos, regras e eventos de domínio lado a lado.
+
 ---
 
 ## Funcionalidade: Registro de usuário

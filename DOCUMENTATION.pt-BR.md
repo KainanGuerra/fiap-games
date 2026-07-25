@@ -16,6 +16,8 @@ O domínio do problema foi dividido em **bounded contexts** claros — `Users` e
 
 As entidades de domínio (`User`, `Game`) carregam comportamento, não são apenas sacos de propriedades: regras como "atualizar perfil" ou "trocar senha" vivem na própria entidade, e não espalhadas pela camada de aplicação.
 
+Os fluxos de cada bounded context foram primeiro mapeados com **Event Storming** — atores, comandos, regras/políticas de validação, agregados e eventos de domínio — antes de virar código. O resultado está em [`diagrams/DiagramaEventStorming.jpg`](diagrams/DiagramaEventStorming.jpg), cobrindo o fluxo de registro de usuário e o fluxo de criação de jogo.
+
 ### 2.2 Clean Architecture e SOLID
 
 Dentro de cada módulo, o código é organizado em camadas concêntricas — `Domain` → `Application` → `Infrastructure`, com os `Endpoints` como camada mais externa. A regra é simples: dependências sempre apontam para dentro. O domínio não conhece o banco de dados, a camada de aplicação não conhece detalhes HTTP, e a infraestrutura apenas implementa contratos definidos pelas camadas internas.
@@ -51,6 +53,8 @@ infra/terraform/                        # infraestrutura como código para Azure
 ```
 
 Cada módulo implementa um contrato comum (`IModule`, com `RegisterModule` e `MapEndpoints`) e é registrado no host — os módulos nunca se referenciam diretamente entre si. Os endpoints são construídos com **Minimal APIs**, agrupados por módulo (`MapGroup("/api/...")`), com autenticação exigida por grupo via `RequireAuthorization()`.
+
+O diagrama em [`diagrams/DiagramaDDD.jpg`](diagrams/DiagramaDDD.jpg) mostra essa mesma estrutura visualmente: os dois bounded contexts, suas camadas internas (Endpoints → Application → Domain, com a Infrastructure implementando a persistência) e o Shared Kernel/Infrastructure compartilhado por ambos.
 
 ## 4. Modelo de domínio
 
