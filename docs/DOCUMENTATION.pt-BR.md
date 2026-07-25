@@ -99,6 +99,19 @@ O MongoDB é schemaless, então não existe migration de schema no sentido relac
 - **Tratamento global de exceções**: qualquer erro não esperado é capturado centralmente, logado com detalhe no servidor, e retornado ao cliente como uma resposta genérica e segura (sem stack trace).
 - **Logs estruturados**: cada requisição gera uma linha de log em JSON, pronta para ser consumida por ferramentas de observabilidade.
 
+### 7.1 Cobertura de testes
+
+Cobertura de linha agregada (`dotnet test --collect:"XPlat Code Coverage"`): **32.2%**.
+
+| Projeto | Cobertura |
+|---|---|
+| `FiapGames.Shared.Kernel` | 77.9% |
+| `FiapGames.Modules.Games` | 42.7% |
+| `FiapGames.Modules.Users` | 28.2% |
+| `FiapGames.Shared.Infrastructure` | 2.8% |
+
+A cobertura se concentra em `Application` (services/validators) e nas entidades de domínio; `Endpoints`, repositórios Mongo e migrations ficam a 0%, validados manualmente em vez de por teste automatizado.
+
 ## 8. Entregáveis
 
 - API REST funcional com CRUD completo de Usuários e Jogos, listagem paginada e autenticação JWT.
