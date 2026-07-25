@@ -92,6 +92,8 @@ MongoDB is schemaless, so there's no relational-style schema migration. What the
 - Infrastructure as code in Terraform, to provision the full environment on Azure.
 - Project documentation (this document) and a quick-start guide (`README.md`).
 
+**Plus — what the published image is good for:** the CI/CD pipeline publishes the API image to the **GitHub Container Registry (GHCR)**, tagged with both the commit SHA and `latest`. That image is portable — it can be pulled and run on any machine with Docker, dropped into `docker-compose.yml` in place of a local build, or fed directly into the Terraform `container_image` variable to deploy it to Azure Container Apps. Note that GHCR packages are private by default and must be made public (or pulled with an authenticated token) if others need to access them without credentials.
+
 ## 9. Running the project
 
 The full step-by-step for running the project locally (via Docker Compose or natively) is in [`README.md`](README.md), written for anyone who just needs to stand it up and evaluate it.

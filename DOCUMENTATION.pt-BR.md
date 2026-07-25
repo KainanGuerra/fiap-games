@@ -92,6 +92,8 @@ O MongoDB é schemaless, então não existe migration de schema no sentido relac
 - Infraestrutura como código em Terraform, para provisionar o ambiente completo no Azure.
 - Documentação do projeto (este documento) e um guia rápido de execução (`README.md`).
 
+**Plus — para que serve a imagem publicada:** o pipeline de CI/CD publica a imagem da API no **GitHub Container Registry (GHCR)**, com tags do SHA do commit e `latest`. Essa imagem é portátil — pode ser puxada e rodada em qualquer máquina com Docker, usada no `docker-compose.yml` no lugar de um build local, ou apontada diretamente na variável `container_image` do Terraform para implantar no Azure Container Apps. Vale notar que pacotes no GHCR nascem privados por padrão, e precisam ser tornados públicos (ou puxados com um token autenticado) para que outras pessoas consigam acessá-los sem credenciais.
+
 ## 9. Como executar
 
 O passo a passo completo para rodar o projeto localmente (via Docker Compose ou nativamente) está no [`README.md`](README.md), pensado para quem só precisa subir e avaliar a aplicação.
