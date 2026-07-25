@@ -6,6 +6,7 @@ using FiapGames.Shared.Infrastructure.Auth;
 using FiapGames.Shared.Infrastructure.Settings;
 using FiapGames.Shared.Kernel.Pagination;
 using FiapGames.Shared.Kernel.Results;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 
@@ -21,7 +22,8 @@ public class UserServiceTests
     public UserServiceTests()
     {
         var jwtSettings = Options.Create(new JwtSettings { ExpiryMinutes = 60 });
-        _sut = new UserService(_repository, _passwordHasher, _tokenService, jwtSettings);
+        var logger = Substitute.For<ILogger<UserService>>();
+        _sut = new UserService(_repository, _passwordHasher, _tokenService, jwtSettings, logger);
     }
 
     [Fact]

@@ -97,7 +97,7 @@ MongoDB is schemaless, so there's no relational-style schema migration. What the
 - **Automated tests**: cover application services and validators for both modules, with mocked dependencies (no dependency on a real database).
 - **Behavior scenarios (BDD)**: `behavior`/`behavior.pt-BR` document, in Gherkin, the acceptance flows validated manually and automatically throughout development.
 - **Global exception handling**: any unexpected error is caught centrally, logged in full detail server-side, and returned to the client as a generic, safe response (no stack trace).
-- **Structured logging**: every request produces one JSON log line, ready to be consumed by observability tooling.
+- **Structured logging**: every request produces one JSON log line, ready to be consumed by observability tooling. Application services (`UserService`, `GameService`) also log the relevant business events (registration, login, conflict, not found, create/update/delete) via `ILogger`, with named properties (`{UserId}`, `{Email}`, `{GameId}`) instead of loose strings — that lays the groundwork for a future OpenTelemetry adoption without having to rewrite business logic.
 
 ### 7.1 Test coverage
 

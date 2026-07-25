@@ -4,6 +4,7 @@ using FiapGames.Modules.Games.Application.Services;
 using FiapGames.Modules.Games.Domain;
 using FiapGames.Shared.Kernel.Pagination;
 using FiapGames.Shared.Kernel.Results;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 
 namespace FiapGames.Modules.Games.Tests;
@@ -15,7 +16,8 @@ public class GameServiceTests
 
     public GameServiceTests()
     {
-        _sut = new GameService(_repository);
+        var logger = Substitute.For<ILogger<GameService>>();
+        _sut = new GameService(_repository, logger);
     }
 
     [Fact]

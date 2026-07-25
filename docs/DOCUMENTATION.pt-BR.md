@@ -97,7 +97,7 @@ O MongoDB é schemaless, então não existe migration de schema no sentido relac
 - **Testes automatizados**: cobertura dos serviços de aplicação e dos validadores de ambos os módulos, com dependências mockadas (sem depender de banco real).
 - **Cenários de comportamento (BDD)**: os arquivos `behavior`/`behavior.pt-BR` documentam, em Gherkin, os fluxos de aceite validados manual e automaticamente durante o desenvolvimento.
 - **Tratamento global de exceções**: qualquer erro não esperado é capturado centralmente, logado com detalhe no servidor, e retornado ao cliente como uma resposta genérica e segura (sem stack trace).
-- **Logs estruturados**: cada requisição gera uma linha de log em JSON, pronta para ser consumida por ferramentas de observabilidade.
+- **Logs estruturados**: cada requisição gera uma linha de log em JSON, pronta para ser consumida por ferramentas de observabilidade. Além disso, os serviços de aplicação (`UserService`, `GameService`) logam os eventos de negócio relevantes (registro, login, conflito, não encontrado, criação/atualização/remoção) via `ILogger`, com propriedades nomeadas (`{UserId}`, `{Email}`, `{GameId}`) em vez de string solta — isso deixa a base pronta para uma futura adoção de OpenTelemetry sem precisar reescrever a lógica de negócio.
 
 ### 7.1 Cobertura de testes
 
