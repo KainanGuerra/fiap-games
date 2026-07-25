@@ -2,9 +2,9 @@
 
 *[Leia em Português](behavior.pt-BR.md)*
 
-Gherkin-style scenarios describing the observable behavior of the API. These describe *what* the system does from the outside (HTTP in, HTTP out) — they're the acceptance layer that `context.md` (the spec) drives, not implementation detail.
+Gherkin-style scenarios describing the observable behavior of the API. These describe *what* the system does from the outside (HTTP in, HTTP out) — they're the acceptance layer that `context` (the spec) drives, not implementation detail.
 
-The two main flows (user registration and game creation) were first mapped out with Event Storming before becoming scenarios — see [`diagrams/DiagramaEventStorming.jpg`](diagrams/DiagramaEventStorming.jpg) for actors, commands, rules, and domain events side by side (diagram labels are in Portuguese).
+The two main flows (user registration and game creation) were first mapped out with Event Storming before becoming scenarios — see [`DiagramaEventStorming`](diagrams/DiagramaEventStorming.jpg) for actors, commands, rules, and domain events side by side (diagram labels are in Portuguese).
 
 ---
 

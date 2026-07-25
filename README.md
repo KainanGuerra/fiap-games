@@ -117,4 +117,4 @@ Applies to either option above:
 
 ## Full documentation
 
-For architecture details (module organization, design decisions, Mongo migrations, CI/CD, and Terraform infrastructure), see [DOCUMENTATION.md](DOCUMENTATION.md) (or [DOCUMENTATION.pt-BR.md](DOCUMENTATION.pt-BR.md) in Portuguese).
+For architecture details (module organization, design decisions, Mongo migrations, CI/CD, and Terraform infrastructure), see [DOCUMENTATION](DOCUMENTATION.md) (or [DOCUMENTATION.pt-BR](DOCUMENTATION.pt-BR.md) in Portuguese).

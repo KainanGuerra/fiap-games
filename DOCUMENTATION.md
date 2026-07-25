@@ -6,6 +6,19 @@
 
 This document describes the solution built for the challenge of implementing a REST API to manage **Users** and **Games**, complete with authentication, persistence, and infrastructure. The focus here isn't just "what was built," but **how** it was built: the development methodology and the architectural decisions behind the project.
 
+### Navigation
+
+All of the project's written content is spread across this document and a few others, each with its own purpose:
+
+| File | Content |
+|---|---|
+| [`README`](README.md) / [`README.pt-BR`](README.pt-BR.md) | Quick-start guide to run and evaluate the project (Docker Compose, image pull, tests). |
+| [`context`](context.md) / [`context.pt-BR`](context.pt-BR.md) | Specification: the system's functional and non-functional requirements. |
+| [`behavior`](behavior.md) / [`behavior.pt-BR`](behavior.pt-BR.md) | Gherkin behavior scenarios (BDD) — the project's acceptance layer. |
+| [`discover`](discovers/discover.md) / [`discover.pt-BR`](discovers/discover.pt-BR.md) | Technical concepts and trivia discovered along the way (Shared Kernel, CLR/JIT, .NET history, etc.). |
+| [`DiagramaDDD`](diagrams/DiagramaDDD.jpg) | Architecture diagram: bounded contexts, layers, and the Shared Kernel/Infrastructure. |
+| [`DiagramaEventStorming`](diagrams/DiagramaEventStorming.jpg) | Event Storming diagram for the user registration and game creation flows. |
+
 ## 2. Development methodology
 
 The project was guided by three mutually reinforcing methodological pillars, applied throughout the whole development cycle: **DDD** to model the domain, **Clean Architecture** (with **SOLID**) to organize the code, and **BDD** to describe and validate the system's expected behavior.
@@ -16,7 +29,7 @@ The problem domain was split into clear **bounded contexts** — `Users` and `Ga
 
 Domain entities (`User`, `Game`) carry behavior — they aren't just property bags. Rules like "update profile" or "change password" live on the entity itself, not scattered across the application layer.
 
-Each bounded context's flow was first mapped out with **Event Storming** — actors, commands, validation rules/policies, aggregates, and domain events — before it became code. The result is in [`diagrams/DiagramaEventStorming.jpg`](diagrams/DiagramaEventStorming.jpg), covering the user registration flow and the game creation flow (diagram labels are in Portuguese).
+Each bounded context's flow was first mapped out with **Event Storming** — actors, commands, validation rules/policies, aggregates, and domain events — before it became code. The result is in [`DiagramaEventStorming`](diagrams/DiagramaEventStorming.jpg), covering the user registration flow and the game creation flow (diagram labels are in Portuguese).
 
 ### 2.2 Clean Architecture and SOLID
 
@@ -31,9 +44,9 @@ Within each module, code is organized in concentric layers — `Domain` → `App
 
 ### 2.3 Behavior-Driven Development (BDD)
 
-Before (and alongside) implementation, the API's expected behavior was written in **Gherkin** format — `Given / When / Then` — in [`behavior.md`](behavior.md) / [`behavior.pt-BR.md`](behavior.pt-BR.md). These scenarios act as the project's acceptance layer: they describe what the system should do from the perspective of an API consumer (registering a user, authenticating, listing paginated games, getting a 401 without a token, etc.), without diving into implementation detail.
+Before (and alongside) implementation, the API's expected behavior was written in **Gherkin** format — `Given / When / Then` — in [`behavior`](behavior.md) / [`behavior.pt-BR`](behavior.pt-BR.md). These scenarios act as the project's acceptance layer: they describe what the system should do from the perspective of an API consumer (registering a user, authenticating, listing paginated games, getting a 401 without a token, etc.), without diving into implementation detail.
 
-This behavior documentation is paired with a written specification ([`context.md`](context.md) / [`context.pt-BR.md`](context.pt-BR.md)) that formalizes the system's functional and non-functional requirements. Together, these two documents drove the architectural decisions and the acceptance criteria used to validate the implementation.
+This behavior documentation is paired with a written specification ([`context`](context.md) / [`context.pt-BR`](context.pt-BR.md)) that formalizes the system's functional and non-functional requirements. Together, these two documents drove the architectural decisions and the acceptance criteria used to validate the implementation.
 
 ## 3. Solution architecture
 
@@ -54,7 +67,7 @@ infra/terraform/                        # Azure infrastructure as code
 
 Each module implements a shared contract (`IModule`, with `RegisterModule` and `MapEndpoints`) and is registered with the host — modules never reference each other directly. Endpoints are built with **Minimal APIs**, grouped per module (`MapGroup("/api/...")`), with authentication required per group via `RequireAuthorization()`.
 
-The diagram in [`diagrams/DiagramaDDD.jpg`](diagrams/DiagramaDDD.jpg) shows this same structure visually: the two bounded contexts, their internal layers (Endpoints → Application → Domain, with Infrastructure implementing persistence), and the Shared Kernel/Infrastructure both contexts depend on (diagram labels are in Portuguese).
+The diagram in [`DiagramaDDD`](diagrams/DiagramaDDD.jpg) shows this same structure visually: the two bounded contexts, their internal layers (Endpoints → Application → Domain, with Infrastructure implementing persistence), and the Shared Kernel/Infrastructure both contexts depend on (diagram labels are in Portuguese).
 
 ## 4. Domain model
 
@@ -82,7 +95,7 @@ MongoDB is schemaless, so there's no relational-style schema migration. What the
 ## 7. Quality: tests, error handling and observability
 
 - **Automated tests**: cover application services and validators for both modules, with mocked dependencies (no dependency on a real database).
-- **Behavior scenarios (BDD)**: `behavior.md`/`behavior.pt-BR.md` document, in Gherkin, the acceptance flows validated manually and automatically throughout development.
+- **Behavior scenarios (BDD)**: `behavior`/`behavior.pt-BR` document, in Gherkin, the acceptance flows validated manually and automatically throughout development.
 - **Global exception handling**: any unexpected error is caught centrally, logged in full detail server-side, and returned to the client as a generic, safe response (no stack trace).
 - **Structured logging**: every request produces one JSON log line, ready to be consumed by observability tooling.
 
@@ -90,11 +103,11 @@ MongoDB is schemaless, so there's no relational-style schema migration. What the
 
 - A functional REST API with full CRUD for Users and Games, paginated listing, and JWT authentication.
 - An automated test suite.
-- A written project specification (`context.md`) and BDD behavior scenarios (`behavior.md`), both also available in Portuguese.
+- A written project specification (`context`) and BDD behavior scenarios (`behavior`), both also available in Portuguese.
 - Application containerization (Dockerfile + docker-compose).
 - A CI/CD pipeline on GitHub Actions (build, test, and image publishing).
 - Infrastructure as code in Terraform, to provision the full environment on Azure.
-- Project documentation (this document) and a quick-start guide (`README.md`).
+- Project documentation (this document) and a quick-start guide (`README`).
 
 ## 9. CI/CD and the published image
 
@@ -108,11 +121,11 @@ The image is published to `ghcr.io/kainanguerra/fiap-games`, with two tags on ev
 
 ### 9.3 What you can do with the image
 
-With the package public, there are two equally valid ways to run the project: cloning the repository and building with Docker Compose, or pulling the published image straight from GHCR without cloning anything — both are documented side by side in `README.md`. The same image can also be fed directly into the Terraform `container_image` variable to deploy it to Azure Container Apps.
+With the package public, there are two equally valid ways to run the project: cloning the repository and building with Docker Compose, or pulling the published image straight from GHCR without cloning anything — both are documented side by side in `README`. The same image can also be fed directly into the Terraform `container_image` variable to deploy it to Azure Container Apps.
 
 ## 10. Running the project
 
-The full step-by-step for running the project locally (via Docker Compose or natively) is in [`README.md`](README.md), written for anyone who just needs to stand it up and evaluate it.
+The full step-by-step for running the project locally (via Docker Compose or natively) is in [`README`](README.md), written for anyone who just needs to stand it up and evaluate it.
 
 ## 11. Conclusion
 
