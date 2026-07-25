@@ -92,12 +92,24 @@ MongoDB is schemaless, so there's no relational-style schema migration. What the
 - Infrastructure as code in Terraform, to provision the full environment on Azure.
 - Project documentation (this document) and a quick-start guide (`README.md`).
 
-**Plus — what the published image is good for:** the CI/CD pipeline publishes the API image to the **GitHub Container Registry (GHCR)**, tagged with both the commit SHA and `latest`. That image is portable — it can be pulled and run on any machine with Docker, dropped into `docker-compose.yml` in place of a local build, or fed directly into the Terraform `container_image` variable to deploy it to Azure Container Apps. Note that GHCR packages are private by default and must be made public (or pulled with an authenticated token) if others need to access them without credentials.
+## 9. CI/CD and the published image
 
-## 9. Running the project
+### 9.1 Pipeline
+
+The workflow (`.github/workflows/ci-cd.yml`) has two jobs. `build-and-test` runs on every push or pull request to `main`: restore, build, and run the test suite. `docker-build-and-push` only runs on a direct push to `main` (never on PRs) and only after the previous job passes — it builds the API image from the `Dockerfile` and publishes it.
+
+### 9.2 GitHub Container Registry (GHCR)
+
+The image is published to `ghcr.io/kainanguerra/fiap-games`, with two tags on every push: the commit SHA (an immutable, traceable version) and `latest` (always the most recent build). GHCR packages are private by default, but for an academic project it makes sense to make this one public (Package settings → Change visibility) — that way, whoever is evaluating the project can pull and run it directly, with no GitHub credentials involved.
+
+### 9.3 What you can do with the image
+
+With the package public, there are two equally valid ways to run the project: cloning the repository and building with Docker Compose, or pulling the published image straight from GHCR without cloning anything — both are documented side by side in `README.md`. The same image can also be fed directly into the Terraform `container_image` variable to deploy it to Azure Container Apps.
+
+## 10. Running the project
 
 The full step-by-step for running the project locally (via Docker Compose or natively) is in [`README.md`](README.md), written for anyone who just needs to stand it up and evaluate it.
 
-## 10. Conclusion
+## 11. Conclusion
 
 The project combines three mutually reinforcing practices: **DDD** to model the problem around the business's own language, **Clean Architecture/SOLID** to keep the code organized and testable, and **BDD** to ensure the delivered behavior matches the specified behavior. The result is a modular, tested, containerized API with reproducible infrastructure — from code to cloud.

@@ -6,12 +6,17 @@ API REST em .NET 10 para gerenciamento de Usuários e Jogos, com autenticação 
 
 ## Como rodar o projeto
 
+Existem duas formas de rodar a aplicação: **clonando o repositório** (o jeito mais completo, dá acesso ao código e aos testes) ou **puxando a imagem já publicada** direto do GHCR (mais rápido, não precisa clonar nada). Escolha a que for mais conveniente.
+
 ### Pré-requisitos
 
-- Docker e Docker Compose (é tudo que você precisa para subir a aplicação)
-- .NET 10 SDK (opcional — só necessário para rodar a API fora do Docker ou rodar os testes localmente)
+- Docker (é tudo que você precisa, em ambas as opções)
+- .NET 10 SDK (opcional — só necessário se for rodar a API fora do Docker ou rodar os testes localmente)
+- Git (só necessário para a Opção A)
 
-### Subindo com Docker Compose
+### Opção A — Clonando o repositório
+
+#### Subindo com Docker Compose
 
 Copie o arquivo de variáveis de ambiente de acordo com o seu sistema operacional, depois suba a stack:
 
@@ -39,15 +44,7 @@ Isso sobe a API e o MongoDB juntos. Aguarde alguns segundos até o Mongo ficar s
 - Swagger UI: http://localhost:8080/swagger
 - Health check: http://localhost:8080/health
 
-### Testando a API pelo Swagger
-
-1. Abra http://localhost:8080/swagger.
-2. Crie uma conta em `POST /api/users/register`.
-3. Faça login em `POST /api/users/login` para obter um token JWT.
-4. Clique em **Authorize** no topo do Swagger e cole o token (formato `Bearer <token>`).
-5. Explore os demais endpoints de Usuários e Jogos — todos autenticados aparecem com o cadeado.
-
-### Rodando sem Docker (API local + Mongo em container)
+#### Rodando sem Docker (API local + Mongo em container)
 
 ```bash
 docker run -d --name mongo -p 27017:27017 mongo:7
@@ -56,13 +53,39 @@ dotnet run --project src/Api/FiapGames.Api
 
 Já existe um segredo de JWT padrão em `appsettings.Development.json` para esse modo, sem necessidade de configuração extra.
 
-### Rodando os testes automatizados
+#### Rodando os testes automatizados
 
 ```bash
 dotnet test
 ```
 
 21 testes unitários cobrindo os serviços e validadores dos módulos de Usuários e Jogos.
+
+### Opção B — Pull direto da imagem (sem clonar o repositório)
+
+A cada push na `main`, o CI/CD publica a imagem da API no GitHub Container Registry, pública e pronta pra rodar:
+
+```bash
+docker network create fiap-games-net
+docker run -d --name mongo --network fiap-games-net mongo:7
+docker run -d --name fiap-games-api --network fiap-games-net -p 8080:8080 \
+  -e Mongo__ConnectionString="mongodb://mongo:27017" \
+  -e Mongo__DatabaseName="fiap_games" \
+  -e Jwt__Secret="uma-string-bem-longa-e-aleatoria" \
+  ghcr.io/kainanguerra/fiap-games:latest
+```
+
+Mesmo resultado da Opção A — API em http://localhost:8080, Swagger em http://localhost:8080/swagger — só que sem precisar clonar nem buildar nada localmente.
+
+### Testando a API pelo Swagger
+
+Vale para as duas opções acima:
+
+1. Abra http://localhost:8080/swagger.
+2. Crie uma conta em `POST /api/users/register`.
+3. Faça login em `POST /api/users/login` para obter um token JWT.
+4. Clique em **Authorize** no topo do Swagger e cole o token (formato `Bearer <token>`).
+5. Explore os demais endpoints de Usuários e Jogos — todos autenticados aparecem com o cadeado.
 
 ## Stack utilizada
 
