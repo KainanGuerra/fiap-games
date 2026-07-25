@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.10" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.10" />
+    <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
+    <PackageReference Include="Serilog.Formatting.Compact" Version="3.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Modules\Users\FiapGames.Modules.Users\FiapGames.Modules.Users.csproj" />
+    <ProjectReference Include="..\..\Modules\Games\FiapGames.Modules.Games\FiapGames.Modules.Games.csproj" />
+    <ProjectReference Include="..\..\Shared\FiapGames.Shared.Infrastructure\FiapGames.Shared.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>
