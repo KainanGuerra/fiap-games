@@ -93,6 +93,43 @@ First surprise here: Terraform **doesn't require** this split into multiple file
 - **`terraform.tfvars.example`**: a sample values file for the `variables.tf` inputs — you copy it to `terraform.tfvars` (which is gitignored) and fill in real values before running `apply`.
 - **`.terraform.lock.hcl`**: Terraform's lock file, similar in spirit to a Node `package-lock.json` — it pins the exact version (and hash) of the `azurerm` provider that was downloaded, guaranteeing anyone running `terraform init` pulls the same version, no surprises.
 
+## 8. The SOLID principle behind the `Shared` folder is DIP, not SRP
+
+Easy to assume "putting shared code in a folder" is just organization (SRP). But the real reason `Shared.Infrastructure` exists the way it does — abstractions (`ITokenService`, `IPasswordHasher`) and concrete implementations (`JwtTokenService`, `BCryptPasswordHasher`) living together, while modules (`Users`, `Games`) only ever see the interface — is **DIP** (Dependency Inversion Principle): high-level modules shouldn't depend on low-level concrete implementations, both should depend on an abstraction. `UserService` never does `new JwtTokenService()`; it receives `ITokenService` already injected from outside. **ISP** (small, focused interfaces, one per concern) helps make this viable, but it's a supporting role — DIP is what answers "why does this folder exist the way it does."
+
+## 9. The design patterns that actually show up in the project (not a course checklist)
+
+Worth separating classic GoF from plain .NET convention:
+
+- **Repository** — `IUserRepository`/`IGameRepository` isolate data access from the rest of the code.
+- **Factory Method** — `UserResponse.FromDomain(user)` / `GameResponse.FromDomain(game)`, static factories that convert entity → DTO in one place.
+- **Strategy** — `ITokenService`/`IPasswordHasher`: swappable concrete implementation without touching whoever consumes it.
+- **Command** — each `IMongoMigration` encapsulates an action (`ExecuteAsync`) executed later, in order, by `MongoMigrationRunner`.
+- **Chain of Responsibility** — ASP.NET Core's own middleware pipeline (`UseExceptionHandler` → `UseSerilogRequestLogging` → `UseAuthentication` → `UseAuthorization`).
+- **Result Object** — `Result`/`Result<T>` as a return value for expected failure, instead of throwing an exception for normal control flow.
+- **Options Pattern** — `IOptions<JwtSettings>`/`IOptions<MongoSettings>`, configuration bound from `appsettings.json`.
+- **Extension methods as a fluent builder** — `AddJwtAuthentication()`, `AddMongoDatabase()`, `ToHttpResult()`.
+- **`IModule`** — not a named GoF pattern, but it functions as a self-registration/plugin pattern: each module registers itself with the host without the host knowing its internal details.
+
+## 10. Declaring the interface in the constructor isn't enough — it needs an explicit registration
+
+Declaring `ITokenService` in `UserService`'s constructor only says "I need something that implements this" — it doesn't tell the container *which* implementation to use. That requires an **explicit registration**, in `AuthenticationExtensions.cs`:
+```csharp
+services.AddSingleton<ITokenService, JwtTokenService>();
+```
+Without that registration, the app **compiles fine** and only breaks at runtime, the first time `UserService` gets activated, with `InvalidOperationException: Unable to resolve service for type 'ITokenService'`. C# has no way to know this at compile time — DI type resolution is 100% a runtime concern.
+
+## 11. The three DI "lifetimes": Transient, Scoped, and Singleton
+
+The **lifetime** chosen at registration (the generic argument of `Add___`) controls how long an instance gets reused:
+- **Transient**: a new instance on every injection.
+- **Scoped**: one instance per HTTP request — the default for `AddDbContext<GamesDbContext>()` (`ServiceLifetime contextLifetime = Scoped`, confirmed via reflection directly on the EF Core assembly, not a guess). That's why `GameRepository`/`GameService` are also `AddScoped` in `GamesModule.cs` — they depend on `GamesDbContext`.
+- **Singleton**: one instance for the whole application — the case for `JwtTokenService`/`BCryptPasswordHasher`/`IMongoMigration`, which hold no per-request state.
+
+## 12. The "captive dependency" gotcha isn't symmetric across the three lifetimes
+
+A **Singleton can never depend on a Scoped service** — a Singleton is always constructed from the root provider, outside of any request, so there's no "scope" to pull the Scoped dependency from, and the container breaks at runtime with "Cannot consume scoped service from singleton." A **Transient that depends on a Scoped service works fine**, though, because a Transient has no scope of its own — it's resolved within whatever scope asked for it, and in ASP.NET Core every HTTP request already runs inside its own automatic scope. A quick test with `ServiceProviderOptions { ValidateScopes = true }` confirms this side by side: the same Transient resolved inside a scope works with no error; resolved directly from the root provider (outside any scope), it breaks with the same class of error as the Singleton case. The real compatibility rule: a Singleton only safely depends on a Singleton; a Scoped depends on Scoped or Singleton; a Transient depends on any of the three, because it borrows whoever's consuming it scope instead of having a fixed one.
+
 ## Glossary
 
 - **AOT (Ahead-Of-Time)** — compiling straight to native machine code at build time, without relying on the JIT at runtime.
@@ -104,7 +141,9 @@ First surprise here: Terraform **doesn't require** this split into multiple file
 - **DDD (Domain-Driven Design)** — a software modeling approach centered on the business domain's language and rules.
 - **DI (Dependency Injection)** — a pattern where an object receives its dependencies from outside (typically via its constructor) instead of creating them itself.
 - **DLL (Dynamic Link Library)** — the binary file produced by the build (e.g. `FiapGames.Api.dll`), containing the compiled IL and its metadata; it's what the CLR loads and the JIT translates at runtime.
+- **DTO (Data Transfer Object)** — an object used only to carry data between layers (e.g. `UserResponse`, `GameResponse`), with no domain behavior, unlike an entity.
 - **EF / EF Core (Entity Framework Core)** — Microsoft's official ORM; in this project, it's the layer used to access MongoDB.
+- **GoF (Gang of Four)** — the nickname for the four authors of the *Design Patterns* book (1994), which cataloged patterns like Repository, Factory Method, Strategy, Command, and Chain of Responsibility — the classic reference whenever someone says "design pattern" with no further context.
 - **HCL (HashiCorp Configuration Language)** — the language `.tf` files are written in; it's declarative (you describe the desired end state, not the step-by-step to get there).
 - **IaC (Infrastructure as Code)** — describing cloud infrastructure in versioned configuration files (here, the `.tf` files in `infra/terraform/`) instead of clicking around a portal; writing the file doesn't apply anything by itself, the tool still has to be run.
 - **IL (Intermediate Language)** — the CPU-agnostic intermediate bytecode the C# compiler produces, which becomes the `.dll`.

@@ -93,6 +93,43 @@ O primeiro estranhamento aqui: o Terraform **não exige** essa divisão em vári
 - **`terraform.tfvars.example`**: um exemplo de arquivo de valores pra preencher as `variables.tf` — você copia pra `terraform.tfvars` (esse sim ignorado pelo git) e substitui pelos valores reais antes de rodar `apply`.
 - **`.terraform.lock.hcl`**: o "lock file" do Terraform, igual em espírito a um `package-lock.json` do Node — trava a versão exata (e o hash) do provider `azurerm` que foi baixado, garantindo que todo mundo que rodar `terraform init` puxe a mesma versão, sem surpresa.
 
+## 8. O princípio do SOLID por trás da pasta `Shared` é o DIP, não o SRP
+
+Fácil de achar que "separar código compartilhado numa pasta" é só organização (SRP). Mas o motivo real de `Shared.Infrastructure` existir como está — abstrações (`ITokenService`, `IPasswordHasher`) e implementações concretas (`JwtTokenService`, `BCryptPasswordHasher`) morando juntas, mas os módulos (`Users`, `Games`) só enxergando a interface — é o **DIP** (Dependency Inversion Principle): módulos de alto nível não devem depender de implementação concreta de baixo nível, ambos devem depender de abstração. `UserService` nunca faz `new JwtTokenService()`; ele recebe `ITokenService` pronto, injetado de fora. O **ISP** (interfaces pequenas e específicas, uma por responsabilidade) ajuda a viabilizar isso, mas é coadjuvante — quem responde "por que essa pasta existe assim" é o DIP.
+
+## 9. Os design patterns que realmente aparecem no projeto (não é lista de curso)
+
+Vale separar GoF clássico de convenção do próprio .NET:
+
+- **Repository** — `IUserRepository`/`IGameRepository` isolam o acesso a dado do resto do código.
+- **Factory Method** — `UserResponse.FromDomain(user)` / `GameResponse.FromDomain(game)`, fábricas estáticas que convertem entidade → DTO num único lugar.
+- **Strategy** — `ITokenService`/`IPasswordHasher`: implementação concreta trocável sem tocar em quem consome.
+- **Command** — cada `IMongoMigration` encapsula uma ação (`ExecuteAsync`) executada depois, em ordem, pelo `MongoMigrationRunner`.
+- **Chain of Responsibility** — o próprio pipeline de middleware do ASP.NET Core (`UseExceptionHandler` → `UseSerilogRequestLogging` → `UseAuthentication` → `UseAuthorization`).
+- **Result Object** — `Result`/`Result<T>` como retorno de valor pra falha esperada, no lugar de lançar exceção pra fluxo de controle normal.
+- **Options Pattern** — `IOptions<JwtSettings>`/`IOptions<MongoSettings>`, configuração bindada do `appsettings.json`.
+- **Extension methods como builder fluente** — `AddJwtAuthentication()`, `AddMongoDatabase()`, `ToHttpResult()`.
+- **`IModule`** — não é GoF nomeado, mas funciona como um padrão de auto-registro/plugin: cada módulo se registra no host sem o host conhecer os detalhes internos dele.
+
+## 10. Declarar a interface no construtor não basta — precisa de registro explícito
+
+Declarar `ITokenService` no construtor do `UserService` só diz "preciso de algo que implemente isso" — não faz o container saber *qual* implementação usar. Isso exige um **registro explícito**, em `AuthenticationExtensions.cs`:
+```csharp
+services.AddSingleton<ITokenService, JwtTokenService>();
+```
+Sem esse registro, o app **compila normalmente** e só quebra em runtime, na primeira ativação de `UserService`, com `InvalidOperationException: Unable to resolve service for type 'ITokenService'`. O C# não tem como saber disso em tempo de compilação — resolução de tipo por DI é 100% runtime.
+
+## 11. Os três "lifetimes" do DI: Transient, Scoped e Singleton
+
+O **lifetime** escolhido no registro (segundo argumento genérico de `Add___`) controla quanto tempo uma instância é reaproveitada:
+- **Transient**: uma instância nova a cada injeção.
+- **Scoped**: uma instância por requisição HTTP — é o padrão do `AddDbContext<GamesDbContext>()` (`ServiceLifetime contextLifetime = Scoped`, confirmado via reflection direto na assembly do EF Core, não é suposição). É por isso que `GameRepository`/`GameService` também são `AddScoped` no `GamesModule.cs` — eles dependem do `GamesDbContext`.
+- **Singleton**: uma instância pra aplicação inteira — o caso de `JwtTokenService`/`BCryptPasswordHasher`/`IMongoMigration`, que não guardam estado por requisição.
+
+## 12. A pegadinha do "captive dependency" não é simétrica entre os três lifetimes
+
+Um **Singleton nunca pode depender de um Scoped** — Singleton é sempre construído a partir do provider raiz, fora de qualquer requisição, então não existe um "escopo" pra buscar a dependência Scoped, e o container quebra em runtime com "Cannot consume scoped service from singleton". Já um **Transient que depende de um Scoped funciona normalmente**, porque um Transient não tem escopo próprio — ele é resolvido dentro do escopo de quem o pediu, e no ASP.NET Core toda requisição HTTP já roda dentro do seu próprio escopo automaticamente. Um teste rápido com `ServiceProviderOptions { ValidateScopes = true }` confirma isso lado a lado: o mesmo Transient resolvido dentro de um escopo funciona sem erro; resolvido direto do provider raiz (fora de qualquer escopo), quebra com a mesma classe de erro do Singleton. A regra de compatibilidade real é: Singleton só depende com segurança de Singleton; Scoped depende de Scoped ou Singleton; Transient depende de qualquer um dos três, porque ele empresta o escopo de quem o consome em vez de ter um fixo.
+
 ## Glossário
 
 - **AOT (Ahead-Of-Time)** — compilação direto pra código de máquina nativo, feita no build, sem depender do JIT em tempo de execução.
@@ -104,7 +141,9 @@ O primeiro estranhamento aqui: o Terraform **não exige** essa divisão em vári
 - **DDD (Domain-Driven Design)** — abordagem de modelagem de software focada na linguagem e nas regras do domínio de negócio.
 - **DI (Dependency Injection)** — padrão em que um objeto recebe suas dependências de fora (normalmente via construtor) em vez de criá-las internamente.
 - **DLL (Dynamic Link Library)** — o arquivo binário resultado do build (ex.: `FiapGames.Api.dll`), contendo o IL compilado e seus metadados; é o que o CLR carrega e o JIT traduz em tempo de execução.
+- **DTO (Data Transfer Object)** — objeto usado só pra transportar dado entre camadas (ex.: `UserResponse`, `GameResponse`), sem comportamento de domínio, diferente da entidade.
 - **EF / EF Core (Entity Framework Core)** — o ORM oficial da Microsoft; neste projeto, é a camada usada pra acessar o MongoDB.
+- **GoF (Gang of Four)** — apelido dos quatro autores do livro *Design Patterns* (1994), que catalogou padrões como Repository, Factory Method, Strategy, Command e Chain of Responsibility — a referência clássica quando alguém fala "design pattern" sem mais contexto.
 - **HCL (HashiCorp Configuration Language)** — a linguagem em que os arquivos `.tf` são escritos; é declarativa (você descreve o resultado desejado, não o passo a passo pra chegar lá).
 - **IaC (Infrastructure as Code)** — descrever infraestrutura de nuvem em arquivos de configuração versionados (aqui, os `.tf` em `infra/terraform/`) em vez de clicar manualmente no portal; escrever o arquivo não aplica nada sozinho, é preciso rodar a ferramenta.
 - **IL (Intermediate Language)** — o bytecode intermediário gerado pelo compilador C#, independente de CPU, que vira o `.dll`.
