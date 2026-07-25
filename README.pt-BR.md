@@ -117,4 +117,4 @@ Vale para as duas opções acima:
 
 ## Documentação completa
 
-Para detalhes de arquitetura (organização dos módulos, decisões de design, migrations no Mongo, CI/CD e infraestrutura Terraform), veja [DOCUMENTATION.pt-BR](DOCUMENTATION.pt-BR.md) (ou [DOCUMENTATION](DOCUMENTATION.md) em inglês).
+Para detalhes de arquitetura (organização dos módulos, decisões de design, migrations no Mongo, CI/CD e infraestrutura Terraform), veja [DOCUMENTATION.pt-BR](docs/DOCUMENTATION.pt-BR.md) (ou [DOCUMENTATION](docs/DOCUMENTATION.md) em inglês).

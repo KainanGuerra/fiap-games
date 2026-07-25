@@ -12,9 +12,9 @@ All of the project's written content is spread across this document and a few ot
 
 | File | Content |
 |---|---|
-| [`README`](README.md) / [`README.pt-BR`](README.pt-BR.md) | Quick-start guide to run and evaluate the project (Docker Compose, image pull, tests). |
-| [`context`](context.md) / [`context.pt-BR`](context.pt-BR.md) | Specification: the system's functional and non-functional requirements. |
-| [`behavior`](behavior.md) / [`behavior.pt-BR`](behavior.pt-BR.md) | Gherkin behavior scenarios (BDD) — the project's acceptance layer. |
+| [`README`](../README.md) / [`README.pt-BR`](../README.pt-BR.md) | Quick-start guide to run and evaluate the project (Docker Compose, image pull, tests). |
+| [`context`](context/context.md) / [`context.pt-BR`](context/context.pt-BR.md) | Specification: the system's functional and non-functional requirements. |
+| [`behavior`](behavior/behavior.md) / [`behavior.pt-BR`](behavior/behavior.pt-BR.md) | Gherkin behavior scenarios (BDD) — the project's acceptance layer. |
 | [`discover`](discovers/discover.md) / [`discover.pt-BR`](discovers/discover.pt-BR.md) | Technical concepts and trivia discovered along the way (Shared Kernel, CLR/JIT, .NET history, etc.). |
 | [`DiagramaDDD`](diagrams/DiagramaDDD.jpg) | Architecture diagram: bounded contexts, layers, and the Shared Kernel/Infrastructure. |
 | [`DiagramaEventStorming`](diagrams/DiagramaEventStorming.jpg) | Event Storming diagram for the user registration and game creation flows. |
@@ -44,9 +44,9 @@ Within each module, code is organized in concentric layers — `Domain` → `App
 
 ### 2.3 Behavior-Driven Development (BDD)
 
-Before (and alongside) implementation, the API's expected behavior was written in **Gherkin** format — `Given / When / Then` — in [`behavior`](behavior.md) / [`behavior.pt-BR`](behavior.pt-BR.md). These scenarios act as the project's acceptance layer: they describe what the system should do from the perspective of an API consumer (registering a user, authenticating, listing paginated games, getting a 401 without a token, etc.), without diving into implementation detail.
+Before (and alongside) implementation, the API's expected behavior was written in **Gherkin** format — `Given / When / Then` — in [`behavior`](behavior/behavior.md) / [`behavior.pt-BR`](behavior/behavior.pt-BR.md). These scenarios act as the project's acceptance layer: they describe what the system should do from the perspective of an API consumer (registering a user, authenticating, listing paginated games, getting a 401 without a token, etc.), without diving into implementation detail.
 
-This behavior documentation is paired with a written specification ([`context`](context.md) / [`context.pt-BR`](context.pt-BR.md)) that formalizes the system's functional and non-functional requirements. Together, these two documents drove the architectural decisions and the acceptance criteria used to validate the implementation.
+This behavior documentation is paired with a written specification ([`context`](context/context.md) / [`context.pt-BR`](context/context.pt-BR.md)) that formalizes the system's functional and non-functional requirements. Together, these two documents drove the architectural decisions and the acceptance criteria used to validate the implementation.
 
 ## 3. Solution architecture
 
@@ -125,7 +125,7 @@ With the package public, there are two equally valid ways to run the project: cl
 
 ## 10. Running the project
 
-The full step-by-step for running the project locally (via Docker Compose or natively) is in [`README`](README.md), written for anyone who just needs to stand it up and evaluate it.
+The full step-by-step for running the project locally (via Docker Compose or natively) is in [`README`](../README.md), written for anyone who just needs to stand it up and evaluate it.
 
 ## 11. Conclusion
 

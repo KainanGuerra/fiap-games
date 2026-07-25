@@ -12,9 +12,9 @@ Todo o conteúdo escrito do projeto está espalhado entre este documento e algun
 
 | Arquivo | Conteúdo |
 |---|---|
-| [`README`](README.md) / [`README.pt-BR`](README.pt-BR.md) | Guia rápido pra rodar e avaliar o projeto (Docker Compose, pull da imagem, testes). |
-| [`context`](context.md) / [`context.pt-BR`](context.pt-BR.md) | Especificação: requisitos funcionais e não funcionais do sistema. |
-| [`behavior`](behavior.md) / [`behavior.pt-BR`](behavior.pt-BR.md) | Cenários de comportamento em Gherkin (BDD) — a camada de aceite do projeto. |
+| [`README`](../README.md) / [`README.pt-BR`](../README.pt-BR.md) | Guia rápido pra rodar e avaliar o projeto (Docker Compose, pull da imagem, testes). |
+| [`context`](context/context.md) / [`context.pt-BR`](context/context.pt-BR.md) | Especificação: requisitos funcionais e não funcionais do sistema. |
+| [`behavior`](behavior/behavior.md) / [`behavior.pt-BR`](behavior/behavior.pt-BR.md) | Cenários de comportamento em Gherkin (BDD) — a camada de aceite do projeto. |
 | [`discover`](discovers/discover.md) / [`discover.pt-BR`](discovers/discover.pt-BR.md) | Conceitos e curiosidades técnicas descobertos ao longo do desenvolvimento (Shared Kernel, CLR/JIT, histórico do .NET, etc.). |
 | [`DiagramaDDD`](diagrams/DiagramaDDD.jpg) | Diagrama da arquitetura: bounded contexts, camadas e Shared Kernel/Infrastructure. |
 | [`DiagramaEventStorming`](diagrams/DiagramaEventStorming.jpg) | Diagrama de Event Storming dos fluxos de registro de usuário e criação de jogo. |
@@ -44,9 +44,9 @@ Os princípios **SOLID** aparecem de forma concreta nessa organização:
 
 ### 2.3 Behavior-Driven Development (BDD)
 
-Antes de (e junto com) a implementação, o comportamento esperado da API foi escrito em formato **Gherkin** — `Dado / Quando / Então` — nos arquivos [`behavior`](behavior.md) / [`behavior.pt-BR`](behavior.pt-BR.md). Esses cenários funcionam como a camada de aceite do projeto: descrevem o que o sistema deve fazer do ponto de vista de quem consome a API (registrar um usuário, autenticar, listar jogos paginados, receber 401 sem token, etc.), sem entrar em detalhe de implementação.
+Antes de (e junto com) a implementação, o comportamento esperado da API foi escrito em formato **Gherkin** — `Dado / Quando / Então` — nos arquivos [`behavior`](behavior/behavior.md) / [`behavior.pt-BR`](behavior/behavior.pt-BR.md). Esses cenários funcionam como a camada de aceite do projeto: descrevem o que o sistema deve fazer do ponto de vista de quem consome a API (registrar um usuário, autenticar, listar jogos paginados, receber 401 sem token, etc.), sem entrar em detalhe de implementação.
 
-Essa documentação de comportamento é acompanhada por uma especificação escrita ([`context`](context.md) / [`context.pt-BR`](context.pt-BR.md)), que formaliza os requisitos funcionais e não funcionais do sistema. Juntos, esses dois documentos guiaram as decisões de arquitetura e os critérios de aceite usados para validar a implementação.
+Essa documentação de comportamento é acompanhada por uma especificação escrita ([`context`](context/context.md) / [`context.pt-BR`](context/context.pt-BR.md)), que formaliza os requisitos funcionais e não funcionais do sistema. Juntos, esses dois documentos guiaram as decisões de arquitetura e os critérios de aceite usados para validar a implementação.
 
 ## 3. Arquitetura da solução
 
@@ -125,7 +125,7 @@ Com o pacote público, existem duas formas igualmente válidas de rodar o projet
 
 ## 10. Como executar
 
-O passo a passo completo para rodar o projeto localmente (via Docker Compose ou nativamente) está no [`README`](README.md), pensado para quem só precisa subir e avaliar a aplicação.
+O passo a passo completo para rodar o projeto localmente (via Docker Compose ou nativamente) está no [`README`](../README.md), pensado para quem só precisa subir e avaliar a aplicação.
 
 ## 11. Conclusão
 
